@@ -3,79 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic | Generating...</title>
+    <title>Cosmic | Checkpoint 2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #05050a; color: white; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #ec4899; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .glass-panel { background: rgba(15, 15, 25, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 40px; text-align: center; width: 100%; max-width: 400px; }
+        .glow-btn { background: linear-gradient(135deg, #ec4899, #f59e0b); display: block; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="text-center" id="loading-screen" style="display: none;">
-        <div class="loader"></div>
-        <h2 class="text-2xl font-bold mb-2">Finalizing Checkpoint</h2>
-        <p id="status" class="text-gray-400">Minting your unique key in the database...</p>
+    <div class="glass-panel">
+        <h1 class="text-3xl font-bold mb-4">Checkpoint 2</h1>
+        <p class="text-gray-400 text-sm mb-6">Final step before key generation.</p>
+        <button onclick="continueToLinkvertise2()" class="glow-btn w-full text-white">CONTINUE TO FINAL</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // ANTI-BYPASS: Check C2 token
-        if (localStorage.getItem('c2_auth') !== 'approved') {
+    <script>
+        // ANTI-BYPASS
+        if (localStorage.getItem('c2_access') !== 'true') {
             window.location.href = "index.html";
-        } else {
-            document.getElementById('loading-screen').style.display = 'block';
-            generateKey();
         }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdLZX_xW_uJZa0zYVTcrfP05s8oMt10DE",
-            authDomain: "cosmic-keys.firebaseapp.com",
-            projectId: "cosmic-keys",
-            storageBucket: "cosmic-keys.firebasestorage.app",
-            messagingSenderId: "289773837908",
-            appId: "1:289773837908:web:7623604e8c4fad63c297c1"
-        };
-
-        async function generateKey() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-                await signInAnonymously(auth);
-
-                const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-                let keyStr = "CSMC-";
-                for (let i = 0; i < 8; i++) {
-                    keyStr += charset.charAt(Math.floor(Math.random() * charset.length));
-                    if(i===3) keyStr += "-";
-                }
-
-                const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
-
-                await setDoc(doc(db, 'artifacts', 'cosmic-app', 'public', 'data', 'keys', keyStr), {
-                    key: keyStr,
-                    createdAt: Date.now(),
-                    expiresAt: expiresAt,
-                    isInfinite: false,
-                    usedBy: "" // Awaiting Roblox inject
-                });
-
-                // Clear bypass tokens so they can't reload this page to spawn infinite keys
-                localStorage.removeItem('c1_auth');
-                localStorage.removeItem('c2_auth');
-
-                window.location.href = `finish.html?key=${keyStr}`;
-
-            } catch (e) {
-                document.getElementById('status').innerText = "Error: " + e.message;
-            }
+        function continueToLinkvertise2() {
+            // Unlock the finish page
+            localStorage.setItem('finish_access', 'true');
+            // Send to Linkvertise 2
+            window.location.href = "https://link-target.net/3218101/5kExnXK0s4Mc";
         }
     </script>
 </body>
 </html>
+
 
