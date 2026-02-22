@@ -7,44 +7,32 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
-        #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-        .glass-panel { position: relative; z-index: 10; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .text-gradient { background: linear-gradient(to right, #a78bfa, #f472b6); color: transparent; -webkit-background-clip: text; background-clip: text; }
-        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
+        body { background-color: #05050a; color: white; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .glass-panel { background: rgba(15, 15, 25, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 40px; text-align: center; width: 100%; max-width: 400px; }
+        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); display: block; padding: 15px; border-radius: 12px; font-weight: bold; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
-    <canvas id="starfield"></canvas>
-    <div class="glass-panel w-full max-w-md p-10 text-center">
-        <h1 class="text-4xl font-bold text-gradient uppercase italic mb-8">Checkpoint 1</h1>
-        <div class="w-full bg-white/5 p-6 rounded-2xl mb-8 border border-white/10">
-            <p class="text-gray-300 text-sm">Please visit the link below and follow the instructions to continue.</p>
-        </div>
-        <!-- In a real app, this link would go to Linkvertise, then redirect back to checkpoint2.html -->
-        <a href="checkpoint2.html" class="block glow-btn w-full py-4 rounded-xl font-bold text-white text-lg">CONTINUE</a>
-        <p class="mt-6 text-xs text-gray-500">Step 1 of 2</p>
+<body>
+    <div class="glass-panel">
+        <h1 class="text-3xl font-bold mb-4">Checkpoint 1</h1>
+        <p class="text-gray-400 text-sm mb-6">One more step to generate your key.</p>
+        <button onclick="nextStep()" class="glow-btn w-full">PROCEED</button>
     </div>
+
     <script>
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-        let width, height, stars = [];
-        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        class Star {
-            constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.z = Math.random() * width; this.size = Math.random() * 1.2; }
-            update() { this.z -= 0.5; if (this.z <= 0) this.z = width; }
-            draw() {
-                let x = (this.x - width / 2) * (width / this.z) + width / 2;
-                let y = (this.y - height / 2) * (width / this.z) + height / 2;
-                let s = this.size * (width / this.z);
-                ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = "white"; ctx.fill();
-            }
+        // ANTI-BYPASS: Check if they came from index.html
+        if (!localStorage.getItem('c1_auth')) {
+            window.location.href = "index.html";
         }
-        for (let i = 0; i < 300; i++) stars.push(new Star());
-        function animate() { ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height); stars.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(animate); }
-        animate();
+
+        function nextStep() {
+            // Log that they completed C1
+            localStorage.setItem('c2_auth', 'true');
+            // Redirect to Checkpoint 2 Linkvertise
+            window.location.href = "https://link-target.net/3218101/5kExnXK0s4Mc";
+        }
     </script>
 </body>
 </html>
+
 
