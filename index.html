@@ -14,7 +14,7 @@
         @keyframes drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10%, 5%) scale(1.2); } }
         .glass-panel { position: relative; z-index: 10; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
         .text-gradient { background: linear-gradient(to right, #a78bfa, #f472b6); color: transparent; -webkit-background-clip: text; background-clip: text; }
-        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); transition: all 0.3s ease; box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
+        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); transition: all 0.3s ease; box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; }
         .glow-btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(236, 72, 153, 0.6); }
     </style>
 </head>
@@ -30,13 +30,30 @@
             </svg>
         </div>
         <h2 class="text-2xl font-bold mb-6">System Locked</h2>
-        <a href="checkpoint1.html" class="block glow-btn w-full py-4 rounded-xl font-bold text-white tracking-wide text-lg mb-6">GET KEY</a>
+        <!-- UPDATED LINK -->
+        <a href="https://link-center.net/3218101/bFudF1K8Tlez" class="glow-btn w-full py-4 rounded-xl font-bold text-white tracking-wide text-lg mb-6">GET KEY</a>
+        
         <div class="flex items-center bg-black/40 rounded-xl p-1 border border-white/10">
-            <input type="text" placeholder="Enter Key..." class="bg-transparent text-white px-4 py-3 w-full outline-none text-sm">
-            <button class="bg-white/10 px-5 py-2.5 rounded-lg font-semibold text-sm">Verify</button>
+            <input type="text" id="keyInput" placeholder="Enter Key..." class="bg-transparent text-white px-4 py-3 w-full outline-none text-sm">
+            <button onclick="verifyKey()" class="bg-white/10 px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-white/20 transition-all">Verify</button>
         </div>
+        <p id="msg" class="mt-4 text-xs font-semibold"></p>
     </div>
     <script>
+        function verifyKey() {
+            const input = document.getElementById('keyInput').value;
+            const msg = document.getElementById('msg');
+            // This matches the key in finish.html
+            if (input === "CSMC-X82-K9Q") {
+                msg.style.color = "#4ade80";
+                msg.innerText = "VALID KEY! Redirecting to Script...";
+                // You can add logic here to open your discord or show the script
+            } else {
+                msg.style.color = "#f87171";
+                msg.innerText = "INVALID KEY. Complete the checkpoints.";
+            }
+        }
+
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
         let width, height, stars = [];
@@ -53,7 +70,7 @@
                 ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = "white"; ctx.fill();
             }
         }
-        for (let i = 0; i < 400; i++) stars.push(new Star());
+        for (let i = 0; i < 400; stars.push(new Star()), i++);
         function animate() { ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height); stars.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(animate); }
         animate();
     </script>
