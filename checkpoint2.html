@@ -3,50 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic | Checkpoint 2</title>
+    <title>Cosmic | Generating...</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
-        #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-        .glass-panel { position: relative; z-index: 10; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .text-gradient { background: linear-gradient(to right, #a78bfa, #f472b6); color: transparent; -webkit-background-clip: text; background-clip: text; }
-        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; }
-        .spinner { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #ec4899; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body { background-color: #05050a; color: white; font-family: 'Space Grotesk', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #ec4899; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
-    <canvas id="starfield"></canvas>
-    <div class="glass-panel w-full max-w-md p-10 text-center">
-        <h1 class="text-4xl font-bold text-gradient uppercase italic mb-8">Final Step</h1>
-        <div class="w-full bg-white/5 p-6 rounded-2xl mb-8 border border-white/10 text-center">
-            <div class="spinner"></div>
-            <p class="text-gray-300 text-sm">Target URL found. Complete this final verification to unlock Cosmic.</p>
-        </div>
-        <a href="https://link-target.net/3218101/5kExnXK0s4Mc" class="glow-btn w-full py-4 rounded-xl font-bold text-white text-lg">VERIFY & GENERATE</a>
-        <p class="mt-6 text-xs text-gray-500 italic">Security protected by Cosmic Database</p>
+<body>
+    <div class="text-center">
+        <div class="loader"></div>
+        <h2 class="text-2xl font-bold mb-2">Finalizing Checkpoint</h2>
+        <p id="status" class="text-gray-400">Minting your unique key in the database...</p>
     </div>
-    <script>
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-        let width, height, stars = [];
-        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        class Star {
-            constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.z = Math.random() * width; this.size = Math.random() * 1.2; }
-            update() { this.z -= 0.5; if (this.z <= 0) this.z = width; }
-            draw() {
-                let x = (this.x - width / 2) * (width / this.z) + width / 2;
-                let y = (this.y - height / 2) * (width / this.z) + height / 2;
-                let s = this.size * (width / this.z);
-                ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = "white"; ctx.fill();
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // ANTI-BYPASS: Check if they completed C1
+        if (!localStorage.getItem('c2_auth')) {
+            window.location.href = "index.html";
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdLZX_xW_uJZa0zYVTcrfP05s8oMt10DE",
+            authDomain: "cosmic-keys.firebaseapp.com",
+            projectId: "cosmic-keys",
+            storageBucket: "cosmic-keys.firebasestorage.app",
+            messagingSenderId: "289773837908",
+            appId: "1:289773837908:web:7623604e8c4fad63c297c1"
+        };
+
+        async function generateKey() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+                await signInAnonymously(auth);
+
+                // Generate random key
+                const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                let keyStr = "CSMC-";
+                for (let i = 0; i < 8; i++) {
+                    keyStr += charset.charAt(Math.floor(Math.random() * charset.length));
+                    if(i===3) keyStr += "-";
+                }
+
+                // Default time: 24 hours from now
+                const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
+
+                // Save to Firestore
+                await setDoc(doc(db, 'artifacts', 'cosmic-app', 'public', 'data', 'keys', keyStr), {
+                    key: keyStr,
+                    createdAt: Date.now(),
+                    expiresAt: expiresAt,
+                    isInfinite: false,
+                    usedBy: "" // Empty until someone injects it in Roblox
+                });
+
+                // Clear bypass tokens so they can't spam refresh
+                localStorage.removeItem('c1_auth');
+                localStorage.removeItem('c2_auth');
+
+                // Redirect to finish page with the key in the URL
+                window.location.href = `finish.html?key=${keyStr}`;
+
+            } catch (e) {
+                document.getElementById('status').innerText = "Database Error: " + e.message;
             }
         }
-        for (let i = 0; i < 200; i++) stars.push(new Star());
-        function animate() { ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height); stars.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(animate); }
-        animate();
+
+        generateKey();
     </script>
 </body>
 </html>
+
 
