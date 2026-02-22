@@ -9,7 +9,7 @@
     <style>
         body { font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
         .glass-panel { background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
-        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; transition: transform 0.2s; }
+        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; transition: transform 0.2s; cursor: pointer; }
         .glow-btn:hover { transform: scale(1.02); }
     </style>
 </head>
@@ -20,28 +20,20 @@
         
         <h2 class="text-2xl font-bold mb-6">System Locked</h2>
         <button onclick="startFlow()" id="startBtn" class="glow-btn w-full py-4 rounded-xl font-bold text-white tracking-wide text-lg mb-6">GET KEY</button>
-        <p id="msg" class="text-xs text-gray-400 hidden">Securing session...</p>
     </div>
 
     <script>
-        // Clear any old sessions to prevent bugs
-        localStorage.removeItem('c1_auth');
-        localStorage.removeItem('c2_auth');
+        // Clear old sessions
+        localStorage.clear();
 
         function startFlow() {
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('msg').classList.remove('hidden');
-            
-            // 1. Give the user the secret token
-            localStorage.setItem('c1_auth', 'approved');
-            
-            // 2. Wait 500ms to guarantee the browser saves it, then redirect to C1 Linkvertise
-            setTimeout(() => {
-                window.location.href = "https://link-center.net/3218101/bFudF1K8Tlez";
-            }, 500);
+            // Unlock checkpoint 1
+            localStorage.setItem('c1_access', 'true');
+            // Go to checkpoint 1
+            window.location.href = "checkpoint1.html";
         }
     </script>
 </body>
 </html>
-
+ 
 
