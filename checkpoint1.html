@@ -13,31 +13,26 @@
     </style>
 </head>
 <body>
-    <div class="glass-panel" id="main-panel" style="display: none;">
+    <div class="glass-panel">
         <h1 class="text-3xl font-bold mb-4">Checkpoint 1</h1>
-        <p class="text-gray-400 text-sm mb-6">One more step to generate your key.</p>
-        <button onclick="nextStep()" class="glow-btn w-full">PROCEED TO C2</button>
+        <p class="text-gray-400 text-sm mb-6">Complete the following step to proceed.</p>
+        <button onclick="continueToLinkvertise()" class="glow-btn w-full text-white">CONTINUE</button>
     </div>
 
     <script>
-        // ANTI-BYPASS: If token is missing, boot them to start
-        if (localStorage.getItem('c1_auth') !== 'approved') {
+        // ANTI-BYPASS
+        if (localStorage.getItem('c1_access') !== 'true') {
             window.location.href = "index.html";
-        } else {
-            // Show panel if authorized
-            document.getElementById('main-panel').style.display = 'block';
         }
 
-        function nextStep() {
-            // Upgrade their token to C2 access
-            localStorage.setItem('c2_auth', 'approved');
-            
-            setTimeout(() => {
-                // Redirect to C2 Linkvertise
-                window.location.href = "https://link-target.net/3218101/5kExnXK0s4Mc";
-            }, 500);
+        function continueToLinkvertise() {
+            // Unlock checkpoint 2 for when they return
+            localStorage.setItem('c2_access', 'true');
+            // Send to Linkvertise 1
+            window.location.href = "https://link-center.net/3218101/bFudF1K8Tlez";
         }
     </script>
 </body>
 </html>
+ 
 
