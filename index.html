@@ -9,51 +9,70 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
         #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-        .nebula { position: fixed; border-radius: 50%; filter: blur(100px); z-index: 1; opacity: 0.5; animation: drift 20s infinite alternate ease-in-out; pointer-events: none; }
-        .nebula-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(139, 92, 246, 0.3); }
-        @keyframes drift { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10%, 5%) scale(1.2); } }
         .glass-panel { position: relative; z-index: 10; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
         .text-gradient { background: linear-gradient(to right, #a78bfa, #f472b6); color: transparent; -webkit-background-clip: text; background-clip: text; }
         .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); transition: all 0.3s ease; box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; }
-        .glow-btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(236, 72, 153, 0.6); }
     </style>
 </head>
 <body class="flex items-center justify-center p-4">
     <canvas id="starfield"></canvas>
-    <div class="nebula nebula-1"></div>
     <div class="glass-panel w-full max-w-md p-10 text-center">
         <h1 class="text-5xl font-bold tracking-tight text-gradient uppercase italic mb-2">COSMIC</h1>
         <p class="text-purple-300/60 text-xs tracking-widest uppercase mb-10">Next-Gen Execution</p>
-        <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-        </div>
+        
         <h2 class="text-2xl font-bold mb-6">System Locked</h2>
-        <!-- UPDATED LINK -->
         <a href="https://link-center.net/3218101/bFudF1K8Tlez" class="glow-btn w-full py-4 rounded-xl font-bold text-white tracking-wide text-lg mb-6">GET KEY</a>
         
-        <div class="flex items-center bg-black/40 rounded-xl p-1 border border-white/10">
-            <input type="text" id="keyInput" placeholder="Enter Key..." class="bg-transparent text-white px-4 py-3 w-full outline-none text-sm">
-            <button onclick="verifyKey()" class="bg-white/10 px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-white/20 transition-all">Verify</button>
+        <div class="flex flex-col gap-2">
+            <div class="flex items-center bg-black/40 rounded-xl p-1 border border-white/10">
+                <input type="text" id="keyInput" placeholder="Enter Key..." class="bg-transparent text-white px-4 py-3 w-full outline-none text-sm">
+                <button id="verifyBtn" class="bg-white/10 px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-white/20 transition-all">Verify</button>
+            </div>
+            <p id="msg" class="text-xs font-semibold mt-2 h-4"></p>
         </div>
-        <p id="msg" class="mt-4 text-xs font-semibold"></p>
     </div>
-    <script>
-        function verifyKey() {
-            const input = document.getElementById('keyInput').value;
-            const msg = document.getElementById('msg');
-            // This matches the key in finish.html
-            if (input === "CSMC-X82-K9Q") {
-                msg.style.color = "#4ade80";
-                msg.innerText = "VALID KEY! Redirecting to Script...";
-                // You can add logic here to open your discord or show the script
-            } else {
-                msg.style.color = "#f87171";
-                msg.innerText = "INVALID KEY. Complete the checkpoints.";
-            }
-        }
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        window.verifyKey = async () => {
+            const key = document.getElementById('keyInput').value.trim();
+            const msg = document.getElementById('msg');
+            const btn = document.getElementById('verifyBtn');
+
+            if (!key) return;
+
+            btn.disabled = true;
+            msg.innerText = "Checking database...";
+            msg.style.color = "white";
+
+            try {
+                await signInAnonymously(auth);
+                const keyDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'keys', key));
+
+                if (keyDoc.exists()) {
+                    msg.style.color = "#4ade80";
+                    msg.innerText = "VALID KEY! Welcome back.";
+                } else {
+                    msg.style.color = "#f87171";
+                    msg.innerText = "INVALID KEY. Complete the checkpoints.";
+                }
+            } catch (e) {
+                msg.innerText = "Error connecting to system.";
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        // Starfield script...
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
         let width, height, stars = [];
@@ -66,11 +85,10 @@
                 let x = (this.x - width / 2) * (width / this.z) + width / 2;
                 let y = (this.y - height / 2) * (width / this.z) + height / 2;
                 let s = this.size * (width / this.z);
-                if (x < 0 || x > width || y < 0 || y > height) return;
                 ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = "white"; ctx.fill();
             }
         }
-        for (let i = 0; i < 400; stars.push(new Star()), i++);
+        for (let i = 0; i < 200; i++) stars.push(new Star());
         function animate() { ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height); stars.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(animate); }
         animate();
     </script>
