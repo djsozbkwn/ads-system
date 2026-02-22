@@ -7,107 +7,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
-        #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
-        .glass-panel { position: relative; z-index: 10; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
-        .text-gradient { background: linear-gradient(to right, #a78bfa, #f472b6); color: transparent; -webkit-background-clip: text; background-clip: text; }
-        .tuesday-glow { background: linear-gradient(to right, #fbbf24, #f59e0b); color: transparent; -webkit-background-clip: text; background-clip: text; }
-        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); transition: all 0.3s ease; box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; }
-        .tuesday-btn { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+        body { font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
+        .glass-panel { background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; box-shadow: 0 0 40px rgba(139, 92, 246, 0.15); }
+        .glow-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); text-align: center; display: block; transition: transform 0.2s; }
+        .glow-btn:hover { transform: scale(1.02); }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
-    <canvas id="starfield"></canvas>
-    <div class="glass-panel w-full max-w-md p-10 text-center">
-        <div id="tuesdayBadge" class="hidden mb-4 bg-yellow-500/20 border border-yellow-500/50 rounded-full py-1 px-3 text-[10px] font-bold text-yellow-500 uppercase tracking-widest inline-block">Tuesday VIP Active</div>
-        <h1 id="mainTitle" class="text-5xl font-bold tracking-tight text-gradient uppercase italic mb-2">COSMIC</h1>
+<body class="flex items-center justify-center h-screen p-4">
+    <div class="glass-panel w-full max-w-md p-10 text-center relative z-10">
+        <h1 class="text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 uppercase italic mb-2">COSMIC</h1>
         <p class="text-purple-300/60 text-xs tracking-widest uppercase mb-10">Next-Gen Execution</p>
         
         <h2 class="text-2xl font-bold mb-6">System Locked</h2>
-        <a id="actionBtn" href="https://link-center.net/3218101/bFudF1K8Tlez" class="glow-btn w-full py-4 rounded-xl font-bold text-white tracking-wide text-lg mb-6">GET KEY</a>
-        
-        <div class="flex flex-col gap-2">
-            <div class="flex items-center bg-black/40 rounded-xl p-1 border border-white/10">
-                <input type="text" id="keyInput" placeholder="Enter Key..." class="bg-transparent text-white px-4 py-3 w-full outline-none text-sm">
-                <button id="verifyBtn" class="bg-white/10 px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-white/20 transition-all">Verify</button>
-            </div>
-            <p id="msg" class="text-xs font-semibold mt-2 h-4"></p>
-        </div>
+        <button onclick="startFlow()" id="startBtn" class="glow-btn w-full py-4 rounded-xl font-bold text-white tracking-wide text-lg mb-6">GET KEY</button>
+        <p id="msg" class="text-xs text-gray-400 hidden">Securing session...</p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    <script>
+        // Clear any old sessions to prevent bugs
+        localStorage.removeItem('c1_auth');
+        localStorage.removeItem('c2_auth');
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdLZX_xW_uJZa0zYVTcrfP05s8oMt10DE",
-            authDomain: "cosmic-keys.firebaseapp.com",
-            projectId: "cosmic-keys",
-            storageBucket: "cosmic-keys.firebasestorage.app",
-            messagingSenderId: "289773837908",
-            appId: "1:289773837908:web:7623604e8c4fad63c297c1"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // Tuesday Easter Egg logic
-        const isTuesday = new Date().getDay() === 2;
-        if (isTuesday) {
-            document.getElementById('tuesdayBadge').classList.remove('hidden');
-            document.getElementById('mainTitle').className = "text-5xl font-bold tracking-tight tuesday-glow uppercase italic mb-2";
-            document.getElementById('actionBtn').classList.add('tuesday-btn');
+        function startFlow() {
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('msg').classList.remove('hidden');
+            
+            // 1. Give the user the secret token
+            localStorage.setItem('c1_auth', 'approved');
+            
+            // 2. Wait 500ms to guarantee the browser saves it, then redirect to C1 Linkvertise
+            setTimeout(() => {
+                window.location.href = "https://link-center.net/3218101/bFudF1K8Tlez";
+            }, 500);
         }
-
-        window.verifyKey = async () => {
-            const key = document.getElementById('keyInput').value.trim();
-            const msg = document.getElementById('msg');
-            const btn = document.getElementById('verifyBtn');
-            if (!key) return;
-
-            btn.disabled = true;
-            msg.innerText = "Searching database...";
-            msg.style.color = "white";
-
-            try {
-                await signInAnonymously(auth);
-                const keyDoc = await getDoc(doc(db, 'artifacts', 'cosmic-app', 'public', 'data', 'keys', key));
-
-                if (keyDoc.exists()) {
-                    msg.style.color = "#4ade80";
-                    msg.innerText = "ACCESS GRANTED. CHECK ROBLOX.";
-                } else {
-                    msg.style.color = "#f87171";
-                    msg.innerText = "KEY NOT FOUND IN SYSTEM.";
-                }
-            } catch (e) {
-                msg.innerText = "COSMIC_DATABASE_OFFLINE";
-            } finally {
-                btn.disabled = false;
-            }
-        };
-
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-        let width, height, stars = [];
-        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        class Star {
-            constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.z = Math.random() * width; this.size = Math.random() * 1.5; }
-            update() { this.z -= 0.8; if (this.z <= 0) this.z = width; }
-            draw() {
-                let x = (this.x - width / 2) * (width / this.z) + width / 2;
-                let y = (this.y - height / 2) * (width / this.z) + height / 2;
-                let s = this.size * (width / this.z);
-                ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = isTuesday ? "#fbbf24" : "white"; ctx.fill();
-            }
-        }
-        for (let i = 0; i < 200; i++) stars.push(new Star());
-        function animate() { ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height); stars.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(animate); }
-        animate();
     </script>
 </body>
 </html>
+
 
