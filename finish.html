@@ -25,18 +25,45 @@
         </div>
 
         <div id="content" class="hidden">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic | Success</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Space Grotesk', sans-serif; background-color: #05050a; color: #ffffff; overflow: hidden; }
+        #starfield { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        .glass-panel { position: relative; z-index: 10; background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
+        .text-gradient { background: linear-gradient(to right, #4ade80, #2dd4bf); color: transparent; -webkit-background-clip: text; background-clip: text; }
+        .key-box { background: rgba(0,0,0,0.5); border: 1px solid rgba(74, 222, 128, 0.2); }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #4ade80; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <canvas id="starfield"></canvas>
+    <div class="glass-panel w-full max-w-md p-10 text-center">
+        <div id="status-area">
+            <div class="loader mx-auto mb-4"></div>
+            <p id="status-text" class="text-sm text-gray-400">Verifying completions...</p>
+        </div>
+
+        <div id="content" class="hidden">
             <div class="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
             </div>
             <h1 class="text-3xl font-bold text-gradient uppercase mb-2">Access Granted</h1>
-            <p class="text-gray-400 text-sm mb-8">Copy your unique key below.</p>
+            <p class="text-gray-400 text-sm mb-8">Copy your Cosmic Key below.</p>
             <div class="key-box rounded-xl p-5 mb-8 flex justify-between items-center">
-                <code id="keyDisplay" class="text-green-300 font-mono text-lg">GENERATING...</code>
-                <button onclick="copyKey()" class="text-xs font-bold text-white/50 hover:text-white uppercase">Copy</button>
+                <code id="keyDisplay" class="text-green-300 font-mono text-lg tracking-wider">GENERATING...</code>
+                <button onclick="copyKey()" id="copyBtn" class="text-xs font-bold text-white/50 hover:text-white uppercase transition-all">Copy</button>
             </div>
-            <p class="text-[10px] text-gray-600 mb-4 uppercase tracking-widest">Expires in 24 hours</p>
+            <p class="text-[10px] text-gray-500 uppercase tracking-tighter mb-4">Expires in 24 Hours</p>
             <a href="index.html" class="text-gray-500 hover:text-white text-sm transition-all underline underline-offset-4">Return Home</a>
         </div>
     </div>
@@ -46,70 +73,72 @@
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdLZX_xW_uJZa0zYVTcrfP05s8oMt10DE",
+            authDomain: "cosmic-keys.firebaseapp.com",
+            projectId: "cosmic-keys",
+            storageBucket: "cosmic-keys.firebasestorage.app",
+            messagingSenderId: "289773837908",
+            appId: "1:289773837908:web:7623604e8c4fad63c297c1"
+        };
 
-        async function generateAndStoreKey() {
+        async function init() {
+            const statusText = document.getElementById('status-text');
             try {
-                // 1. Sign in
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+
+                statusText.innerText = "Handshaking with database...";
                 await signInAnonymously(auth);
-                
-                // 2. Generate Random Key
-                const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-                let key = "CSMC-";
+
+                statusText.innerText = "Syncing Cosmic ID...";
+                const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+                let key = 'CSMC-';
                 for (let i = 0; i < 8; i++) {
-                    key += charset.charAt(Math.floor(Math.random() * charset.length));
-                    if (i === 3) key += "-";
+                    key += characters.charAt(Math.floor(Math.random() * characters.length));
+                    if (i === 3) key += '-';
                 }
 
-                // 3. Save to Firestore
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'keys', key), {
+                await setDoc(doc(db, 'artifacts', 'cosmic-app', 'public', 'data', 'keys', key), {
+                    key: key,
                     createdAt: serverTimestamp(),
-                    status: "active"
+                    expiry: Date.now() + (24 * 60 * 60 * 1000)
                 });
 
-                // 4. Update UI
                 document.getElementById('keyDisplay').innerText = key;
-                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('status-area').classList.add('hidden');
                 document.getElementById('content').classList.remove('hidden');
-
-            } catch (e) {
-                console.error(e);
-                alert("Database Error. Please try again later.");
+            } catch (err) {
+                statusText.innerText = "System error: " + err.message;
+                statusText.style.color = "#f87171";
             }
         }
 
         window.copyKey = () => {
             const key = document.getElementById('keyDisplay').innerText;
             navigator.clipboard.writeText(key);
-            alert("Key copied!");
+            document.getElementById('copyBtn').innerText = "COPIED";
+            setTimeout(() => { document.getElementById('copyBtn').innerText = "COPY"; }, 2000);
         };
 
-        generateAndStoreKey();
+        init();
 
-        // Starfield
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
-        let width, height, stars = [];
+        let width, height;
         function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
-        class Star {
-            constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.z = Math.random() * width; this.size = Math.random() * 1.5; }
-            update() { this.z -= 0.5; if (this.z <= 0) this.z = width; }
-            draw() {
-                let x = (this.x - width / 2) * (width / this.z) + width / 2;
-                let y = (this.y - height / 2) * (width / this.z) + height / 2;
-                let s = this.size * (width / this.z);
-                ctx.beginPath(); ctx.arc(x, y, s, 0, Math.PI * 2); ctx.fillStyle = "white"; ctx.fill();
-            }
+        function animate() {
+            ctx.fillStyle = '#05050a';
+            ctx.fillRect(0,0,width,height);
+            ctx.fillStyle = 'white';
+            for(let i=0; i<80; i++) { ctx.fillRect(Math.random()*width, Math.random()*height, 1, 1); }
+            requestAnimationFrame(animate);
         }
-        for (let i = 0; i < 200; i++) stars.push(new Star());
-        function animate() { ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, width, height); stars.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(animate); }
         animate();
     </script>
 </body>
 </html>
+
 
