@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-    <div class="text-center">
+    <div class="text-center" id="loading-screen" style="display: none;">
         <div class="loader"></div>
         <h2 class="text-2xl font-bold mb-2">Finalizing Checkpoint</h2>
         <p id="status" class="text-gray-400">Minting your unique key in the database...</p>
@@ -24,9 +24,12 @@
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // ANTI-BYPASS: Check if they completed C1
-        if (!localStorage.getItem('c2_auth')) {
+        // ANTI-BYPASS: Check C2 token
+        if (localStorage.getItem('c2_auth') !== 'approved') {
             window.location.href = "index.html";
+        } else {
+            document.getElementById('loading-screen').style.display = 'block';
+            generateKey();
         }
 
         const firebaseConfig = {
@@ -45,7 +48,6 @@
                 const auth = getAuth(app);
                 await signInAnonymously(auth);
 
-                // Generate random key
                 const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
                 let keyStr = "CSMC-";
                 for (let i = 0; i < 8; i++) {
@@ -53,33 +55,27 @@
                     if(i===3) keyStr += "-";
                 }
 
-                // Default time: 24 hours from now
                 const expiresAt = Date.now() + (24 * 60 * 60 * 1000);
 
-                // Save to Firestore
                 await setDoc(doc(db, 'artifacts', 'cosmic-app', 'public', 'data', 'keys', keyStr), {
                     key: keyStr,
                     createdAt: Date.now(),
                     expiresAt: expiresAt,
                     isInfinite: false,
-                    usedBy: "" // Empty until someone injects it in Roblox
+                    usedBy: "" // Awaiting Roblox inject
                 });
 
-                // Clear bypass tokens so they can't spam refresh
+                // Clear bypass tokens so they can't reload this page to spawn infinite keys
                 localStorage.removeItem('c1_auth');
                 localStorage.removeItem('c2_auth');
 
-                // Redirect to finish page with the key in the URL
                 window.location.href = `finish.html?key=${keyStr}`;
 
             } catch (e) {
-                document.getElementById('status').innerText = "Database Error: " + e.message;
+                document.getElementById('status').innerText = "Error: " + e.message;
             }
         }
-
-        generateKey();
     </script>
 </body>
 </html>
-
 
