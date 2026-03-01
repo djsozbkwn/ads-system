@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic | Script Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #030305; 
+            color: #ffffff; 
+            font-family: 'Space Grotesk', sans-serif; 
+            margin: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, #0f172a 0%, #030305 80%);
+        }
+
+        .glass-panel {
+            background: rgba(15, 15, 20, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-panel:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            background: rgba(15, 15, 20, 0.6);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -10px rgba(168, 85, 247, 0.5);
+        }
+
+        .script-container {
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .script-box {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #a78bfa;
+            word-break: break-all;
+            white-space: pre-wrap;
+            background: transparent;
+            border: none;
+            width: 100%;
+        }
+
+        .discord-glow {
+            box-shadow: 0 0 20px rgba(88, 101, 242, 0.1);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+            cursor: pointer;
+        }
+        
+        .discord-glow:hover {
+            background: rgba(88, 101, 242, 0.15);
+            box-shadow: 0 0 30px rgba(88, 101, 242, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="max-w-7xl mx-auto p-6 flex justify-between items-center">
+        <div class="text-2xl font-bold tracking-tighter">COSMIC</div>
+        <div class="flex gap-4">
+            <a href="https://discord.gg/SexKW4Fq5Z" target="_blank" class="hidden sm:flex items-center gap-2 text-sm text-gray-400 hover:text-white transition">
+                Discord
+            </a>
+            <a href="gateway.html" class="px-5 py-2 rounded-xl text-sm font-semibold glass-panel hover:bg-white/10 transition">
+                Dashboard
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <main class="max-w-4xl mx-auto px-6 pt-20 pb-32 text-center">
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+            Reliable <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Execution</span>
+        </h1>
+        <p class="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+            High-performance scripts built for stability and efficiency. Optimized logic for your favorite games.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="gateway.html" class="btn-gradient px-8 py-4 rounded-2xl font-bold text-white uppercase tracking-wide flex items-center justify-center">
+                Get Access Key
+            </a>
+            <!-- Fixed Discord Button -->
+            <button onclick="window.open('https://discord.gg/SexKW4Fq5Z', '_blank')" class="glass-panel px-8 py-4 rounded-2xl font-bold text-white uppercase tracking-wide discord-glow flex items-center justify-center gap-2">
+                <span>Join Discord</span>
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </button>
+        </div>
+    </main>
+
+    <!-- Scripts Section -->
+    <section class="max-w-5xl mx-auto px-6 pb-24">
+        <div class="grid md:grid-cols-2 gap-6">
+            
+            <!-- Semi TP -->
+            <div class="glass-panel p-8 rounded-3xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">Semi TP</h3>
+                    <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded uppercase">Active</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    Lightweight teleportation utility optimized for bypassing standard movement checks.
+                </p>
+                <div class="script-container">
+                    <div class="script-box" id="script-semi">loadstring(game:HttpGet("https://pastefy.app/SIcJFGup/raw"))()</div>
+                    <button onclick="copyScript('script-semi', this)" class="w-full py-2 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white rounded-lg text-xs font-bold transition">
+                        COPY SCRIPT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Duels -->
+            <div class="glass-panel p-8 rounded-3xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">Duels</h3>
+                    <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded uppercase">Active</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    Combat enhancement suite featuring optimized hitbox adjustment and movement tracking.
+                </p>
+                <div class="script-container">
+                    <div class="script-box" id="script-duels">loadstring(game:HttpGet("https://pastefy.app/Yx9A0D7H/raw"))()</div>
+                    <button onclick="copyScript('script-duels', this)" class="w-full py-2 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white rounded-lg text-xs font-bold transition">
+                        COPY SCRIPT
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="p-12 text-center border-t border-white/5">
+        <div class="text-gray-500 text-sm mb-4 italic">"Focus on the code, the rest follows."</div>
+        <div class="text-gray-600 text-xs tracking-widest uppercase">&copy; 2026 Cosmic Systems</div>
+    </footer>
+
+    <script>
+        function copyScript(id, btn) {
+            const text = document.getElementById(id).innerText;
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+
+            const oldText = btn.innerText;
+            btn.innerText = 'COPIED TO CLIPBOARD';
+            btn.style.background = '#10b981';
+            btn.style.color = 'white';
+            setTimeout(() => {
+                btn.innerText = oldText;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+
+
