@@ -236,6 +236,27 @@
 
         .glass-panel {
             background: rgba(15, 15, 20, 0.4);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic | Script Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #030305; 
+            color: #ffffff; 
+            font-family: 'Space Grotesk', sans-serif; 
+            margin: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, #0f172a 0%, #030305 80%);
+        }
+
+        .glass-panel {
+            background: rgba(15, 15, 20, 0.4);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s ease;
@@ -289,14 +310,32 @@
             background: rgba(88, 101, 242, 0.15);
             box-shadow: 0 0 30px rgba(88, 101, 242, 0.3);
         }
+
+        .shop-nav-btn {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .shop-nav-btn:hover {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen scrollbar-hide">
 
     <!-- Navbar -->
-    <nav class="max-w-7xl mx-auto p-6 flex justify-between items-center">
+    <nav class="max-w-7xl mx-auto p-6 flex justify-between items-center relative z-50">
         <div class="text-2xl font-bold tracking-tighter">COSMIC</div>
-        <div class="flex gap-4">
+        <div class="flex items-center gap-4">
+            <a href="https://cosmicsys.vercel.app/shop.html" class="shop-nav-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-purple-300 transition">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">MARKETPLACE</span>
+            </a>
             <a href="https://discord.gg/SexKW4Fq5Z" target="_blank" class="hidden sm:flex items-center gap-2 text-sm text-gray-400 hover:text-white transition">
                 Discord
             </a>
@@ -307,8 +346,8 @@
     </nav>
 
     <!-- Hero Section -->
-    <main class="max-w-4xl mx-auto px-6 pt-20 pb-32 text-center">
-        <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+    <main class="max-w-4xl mx-auto px-6 pt-20 pb-24 text-center">
+        <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
             Reliable <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Execution</span>
         </h1>
         <p class="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
@@ -317,3 +356,102 @@
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="gateway.html" class="btn-gradient px-8 py-4 rounded-2xl font-bold text-white uppercase tracking-wide flex items-center justify-center">
                 Get Access Key
+            </a>
+            <button onclick="window.open('https://discord.gg/SexKW4Fq5Z', '_blank')" class="glass-panel px-8 py-4 rounded-2xl font-bold text-white uppercase tracking-wide discord-glow flex items-center justify-center gap-2">
+                <span>Join Discord</span>
+                <i data-lucide="message-square" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Scripts Section -->
+    <section class="max-w-6xl mx-auto px-6 pb-24">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Invisibility -->
+            <div class="glass-panel p-8 rounded-3xl flex flex-col border-indigo-500/20 bg-indigo-500/5">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-white">Invisibility</h3>
+                    <span class="text-[10px] font-bold text-indigo-400 bg-indigo-400/10 px-2 py-1 rounded uppercase">Active</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    Advanced character transparency utility. Designed to remain undetected during active sessions.
+                </p>
+                <div class="script-container">
+                    <div class="script-box" id="script-invis">loadstring(game:HttpGet("https://raw.githubusercontent.com/Sksheheheuwnanajaj/cosmic/refs/heads/main/Invis.txt"))()</div>
+                    <button onclick="copyScript('script-invis', this)" class="w-full py-2 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white rounded-lg text-xs font-bold transition">
+                        COPY SCRIPT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Semi TP -->
+            <div class="glass-panel p-8 rounded-3xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-white">Semi TP</h3>
+                    <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded uppercase">Active</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    Lightweight teleportation utility optimized for bypassing standard movement checks.
+                </p>
+                <div class="script-container">
+                    <div class="script-box" id="script-semi">loadstring(game:HttpGet("https://pastefy.app/pb8tINkL/raw"))()</div>
+                    <button onclick="copyScript('script-semi', this)" class="w-full py-2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white rounded-lg text-xs font-bold transition">
+                        COPY SCRIPT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Duels -->
+            <div class="glass-panel p-8 rounded-3xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-white">Duels</h3>
+                    <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded uppercase">Active</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-6 flex-1">
+                    Combat enhancement suite featuring bypassed speed adjustment and movement tracking.
+                </p>
+                <div class="script-container">
+                    <div class="script-box" id="script-duels">loadstring(game:HttpGet("https://pastefy.app/Yx9A0D7H/raw"))()</div>
+                    <button onclick="copyScript('script-duels', this)" class="w-full py-2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white rounded-lg text-xs font-bold transition">
+                        COPY SCRIPT
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="p-12 text-center border-t border-white/5">
+        <div class="text-gray-500 text-sm mb-4 italic">"Focus on the code, the rest follows."</div>
+        <div class="text-gray-600 text-xs tracking-widest uppercase">&copy; 2026 Cosmic Systems</div>
+    </footer>
+
+    <script>
+        function copyScript(id, btn) {
+            const text = document.getElementById(id).innerText;
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+
+            const oldText = btn.innerText;
+            btn.innerText = 'COPIED TO CLIPBOARD';
+            btn.style.background = '#10b981';
+            btn.style.color = 'white';
+            setTimeout(() => {
+                btn.innerText = oldText;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
+
