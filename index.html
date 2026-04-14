@@ -56,6 +56,64 @@
         .theme-surprise .sys-nav { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; margin-top: 1.5rem; padding: 0.75rem 1.5rem; }
         .theme-surprise .sys-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(30px) saturate(180%); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .theme-surprise .sys-card:hover { border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic | Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Quicksand:wght@500;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* === BASE TRANSITIONS === */
+        body { transition: background 0.4s ease, color 0.4s ease; min-height: 100vh; overflow-x: hidden; margin: 0; position: relative;}
+        .sys-card, .sys-btn, .sys-nav, .sys-dropdown { transition: all 0.3s ease; }
+        .mesh-bg, .aurora-blobs { display: none; }
+
+        /* === 1. COSMIC THEME === */
+        body.theme-cosmic { background: #030305 radial-gradient(circle at 50% 0%, #0f172a 0%, #030305 80%); color: #fff; font-family: 'Space Grotesk', sans-serif; }
+        .theme-cosmic .sys-nav { background: transparent; padding: 2rem 1.5rem; }
+        .theme-cosmic .sys-card { background: rgba(15,15,20,0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1.5rem; padding: 2rem; }
+        .theme-cosmic .sys-btn { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border-radius: 0.75rem; border: none; font-weight: bold; }
+        .theme-cosmic .sys-title { color: #fff; }
+        .theme-cosmic .sys-sub { color: #9ca3af; }
+        .theme-cosmic .sys-badge { background: #000; border: 1px solid #222; color: #a78bfa; border-radius: 0.5rem; padding: 0.75rem; font-family: monospace; font-size: 0.75rem;}
+        .theme-cosmic .sys-dropdown { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 1rem; color: white; }
+
+        /* === 2. FRUTIGER AERO THEME === */
+        body.theme-aero { background: radial-gradient(circle at 10% 20%, rgba(56,189,248,0.6) 0%, transparent 40%), linear-gradient(180deg, #e0f2fe 0%, #7dd3fc 40%, #4ade80 100%); background-attachment: fixed; color: #0c4a6e; font-family: 'Quicksand', sans-serif; }
+        .theme-aero .sys-nav { background: rgba(255,255,255,0.3); backdrop-filter: blur(15px); border-radius: 2rem; border: 1px solid rgba(255,255,255,0.6); padding: 1rem 1.5rem; margin-top: 1rem; }
+        .theme-aero .sys-card { background: rgba(255,255,255,0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.7); border-radius: 2rem; padding: 2.5rem; }
+        .theme-aero .sys-btn { background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%); border: 2px solid rgba(255,255,255,0.5); border-radius: 50px; color: white; }
+        .theme-aero .sys-title { color: #082f49; }
+        .theme-aero .sys-sub { color: #0369a1; }
+        .theme-aero .sys-badge { background: rgba(255,255,255,0.7); border: 1px solid white; color: #0284c7; border-radius: 1rem; padding: 0.75rem; font-size: 0.75rem;}
+        .theme-aero .sys-dropdown { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.8); border-radius: 1rem; color: #082f49; }
+
+        /* === 3. GLASS BLUR THEME === */
+        body.theme-ios { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .theme-ios .mesh-bg { display: block; position: fixed; inset: 0; background: radial-gradient(circle at 80% 20%, #1e1b4b 0%, transparent 40%), radial-gradient(circle at 20% 80%, #312e81 0%, transparent 40%); z-index: -1; }
+        .theme-ios .sys-nav { background: transparent; padding: 2rem 1.5rem; }
+        .theme-ios .sys-card { background: rgba(28,28,30,0.45); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 2.5rem; padding: 2rem; }
+        .theme-ios .sys-btn { background: #fff; color: #000; border-radius: 50px; font-weight: 700; border: none; }
+        .theme-ios .sys-title { color: #fff; font-weight: 800; }
+        .theme-ios .sys-sub { color: rgba(255,255,255,0.5); }
+        .theme-ios .sys-badge { background: rgba(255,255,255,0.08); border: 0.5px solid rgba(255,255,255,0.1); color: #fff; border-radius: 12px; padding: 0.75rem; font-size: 0.75rem;}
+
+        /* === 4. AURORA SURPRISE === */
+        body.theme-surprise { background: #0f172a; color: #fff; font-family: 'Inter', sans-serif; }
+        .theme-surprise .aurora-blobs { display: block; position: fixed; inset: 0; z-index: -1; overflow: hidden; filter: blur(80px); }
+        .blob { position: absolute; border-radius: 50%; opacity: 0.6; animation: move 20s infinite alternate; }
+        .blob-1 { width: 500px; height: 500px; background: #3b82f6; top: -10%; left: -10%; }
+        .blob-2 { width: 600px; height: 600px; background: #a855f7; bottom: -10%; right: -10%; animation-delay: -5s; }
+        .blob-3 { width: 400px; height: 400px; background: #06b6d4; top: 40%; left: 30%; animation-delay: -10s; }
+        @keyframes move { from { transform: translate(0, 0); } to { transform: translate(100px, 100px); } }
+        
+        .theme-surprise .sys-nav { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; margin-top: 1.5rem; padding: 0.75rem 1.5rem; }
+        .theme-surprise .sys-card { background: rgba(255,255,255,0.03); backdrop-filter: blur(30px) saturate(180%); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .theme-surprise .sys-card:hover { border-color: rgba(255,255,255,0.4); transform: scale(1.02); }
         .theme-surprise .sys-btn { background: rgba(255,255,255,0.9); color: #000; border-radius: 20px; font-weight: 800; border: none; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .theme-surprise .sys-title { background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
         .theme-surprise .sys-sub { color: rgba(255,255,255,0.6); }
@@ -78,8 +136,8 @@
             <span class="text-2xl font-bold sys-title">COSMIC</span>
         </div>
         <div class="flex items-center gap-6">
-            <a href="index.html" class="sys-title font-bold text-sm">HUB</a>
-            <a href="shop.html" class="sys-sub hover:opacity-80 font-bold text-sm transition">SHOP</a>
+            <a href="#" class="sys-title font-bold text-sm">HUB</a>
+            <a href="#" class="sys-sub hover:opacity-80 font-bold text-sm transition">SHOP</a>
             
             <div class="relative">
                 <button onclick="toggleThemeMenu()" class="sys-btn px-5 py-2 text-xs flex items-center gap-2">
@@ -89,7 +147,7 @@
                     <button onclick="setTheme('theme-cosmic')" class="sys-dropdown-btn w-full text-left px-5 py-3 text-sm transition hover:bg-white/10">Default</button>
                     <button onclick="setTheme('theme-aero')" class="sys-dropdown-btn w-full text-left px-5 py-3 text-sm transition hover:bg-white/10 border-t border-white/5">Frutiger Aero</button>
                     <button onclick="setTheme('theme-ios')" class="sys-dropdown-btn w-full text-left px-5 py-3 text-sm transition hover:bg-white/10 border-t border-white/5">Glass Blur</button>
-                    <button onclick="setTheme('theme-surprise')" class="sys-dropdown-btn w-full text-left px-5 py-3 text-sm transition hover:bg-white/10 border-t border-white/5 text-blue-400 font-bold">???</button>
+                    <button onclick="setTheme('theme-surprise')" class="sys-dropdown-btn w-full text-left px-5 py-3 text-sm transition hover:bg-white/10 border-t border-white/5 text-blue-400 font-bold">Aurora</button>
                 </div>
             </div>
         </div>
@@ -105,6 +163,18 @@
     <main class="max-w-6xl mx-auto px-6 pb-32">
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             
+            <!-- NEW: Pass or Die -->
+            <div class="sys-card flex flex-col border-2 border-indigo-500/20">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-2xl font-bold sys-title">Pass or Die</h3>
+                    <span class="px-2 py-0.5 rounded text-[10px] bg-indigo-500/20 text-indigo-400 font-bold uppercase tracking-wider">Beta</span>
+                </div>
+                <p class="sys-sub text-sm flex-grow">Advanced automation with Auto Play and Instant Kill capabilities.</p>
+                <div class="sys-badge mt-6 mb-4 break-all" id="script-pod">loadstring(game:HttpGet("https://cosmicsys.vercel.app/PassOrDie.lua"))()</div>
+                <button onclick="copyScript('script-pod', this)" class="sys-btn w-full py-3.5 text-xs font-bold tracking-widest uppercase">Copy Script</button>
+            </div>
+
+            <!-- Invisibility -->
             <div class="sys-card flex flex-col">
                 <h3 class="text-2xl font-bold sys-title mb-2">Invisibility</h3>
                 <p class="sys-sub text-sm flex-grow">Advanced character concealment script. Total bypass for visibility checks.</p>
@@ -112,6 +182,7 @@
                 <button onclick="copyScript('script-invis', this)" class="sys-btn w-full py-3.5 text-xs font-bold tracking-widest uppercase">Copy Script</button>
             </div>
 
+            <!-- Semi TP -->
             <div class="sys-card flex flex-col">
                 <h3 class="text-2xl font-bold sys-title mb-2">Semi TP</h3>
                 <p class="sys-sub text-sm flex-grow">Reliable teleportation with smooth interpolation and distance checks.</p>
@@ -119,6 +190,7 @@
                 <button onclick="copyScript('script-semi', this)" class="sys-btn w-full py-3.5 text-xs font-bold tracking-widest uppercase">Copy Script</button>
             </div>
 
+            <!-- Duels -->
             <div class="sys-card flex flex-col">
                 <h3 class="text-2xl font-bold sys-title mb-2">Duels</h3>
                 <p class="sys-sub text-sm flex-grow">Combat utility suite for 1v1 arenas. Optimized tracking and speed.</p>
@@ -129,7 +201,7 @@
         </div>
     </main>
 
-    <footer class="pb-20 opacity-30 text-center text-[10px] font-bold uppercase tracking-[0.5em]">Cosmic v2.5.0</footer>
+    <footer class="pb-20 opacity-30 text-center text-[10px] font-bold uppercase tracking-[0.5em]">Cosmic v2.5.1</footer>
 
     <script>
         function setTheme(theme) {
@@ -145,6 +217,7 @@
             if (!e.target.closest('.relative')) document.getElementById('theme-menu').classList.add('hidden');
         });
 
+        // Initialize theme
         const savedTheme = localStorage.getItem('cosmic-active-theme') || 'theme-cosmic';
         document.body.classList.remove('theme-cosmic');
         document.body.classList.add(savedTheme);
@@ -153,12 +226,22 @@
             const text = document.getElementById(id).innerText;
             const temp = document.createElement('textarea');
             temp.value = text; document.body.appendChild(temp);
-            temp.select(); document.execCommand('copy'); document.body.removeChild(temp);
-            const old = btn.innerText; btn.innerText = 'COPIED!';
-            setTimeout(() => btn.innerText = old, 1500);
+            temp.select(); 
+            document.execCommand('copy'); 
+            document.body.removeChild(temp);
+            
+            const old = btn.innerText; 
+            btn.innerText = 'COPIED!';
+            btn.style.opacity = '0.7';
+            setTimeout(() => {
+                btn.innerText = old;
+                btn.style.opacity = '1';
+            }, 1500);
         }
 
         lucide.createIcons();
     </script>
 </body>
 </html>
+
+
