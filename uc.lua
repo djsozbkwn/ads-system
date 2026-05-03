@@ -1,10 +1,10 @@
 local SUPABASE_URL = "https://kwlcycmqncfoxeurymlo.supabase.co"
 local SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3bGN5Y21xbmNmb3hldXJ5bWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NjYzOTAsImV4cCI6MjA5MzM0MjM5MH0.d23vzj-OzLUqLVhLdC1pe-AMmBRpqPzczWFFObzc_74"
 local POLL_INTERVAL = 2
-local MAX_MESSAGES = 60
-local DEFAULT_CHANNEL = "global"
-local CHANNELS = { "global", "trade", "help" }
-local W, H = 560, 310
+local MAX_MESSAGES  = 60
+local DEFAULT_CH    = "global"
+local CHANNELS      = { "global", "trade", "help" }
+local W, H          = 560, 310
 
 local HttpService  = game:GetService("HttpService")
 local Players      = game:GetService("Players")
@@ -13,15 +13,15 @@ local TweenService = game:GetService("TweenService")
 local UIS          = game:GetService("UserInputService")
 local localPlayer  = Players.LocalPlayer
 
-local channelCache    = {}
-local lastMessageTime = {}
-local pollConn        = nil
-local currentChannel  = DEFAULT_CHANNEL
-local msgElements     = {}
-local isMinimized     = false
-local isDragging      = false
+local channelCache = {}
+local lastMsgId    = {}
+local pollConn     = nil
+local currentCh    = DEFAULT_CH
+local msgElements  = {}
+local isMin        = false
+local isDrag       = false
 local dragStart, startPos
-local appendMessage, appendSystem
+local appendMsg, appendSys
 local tabButtons = {}
 
 local httpRequest = (syn and syn.request)
@@ -30,30 +30,25 @@ local httpRequest = (syn and syn.request)
     or function(opts)
         local ok, res = pcall(function()
             return HttpService:RequestAsync({
-                Url     = opts.Url,
-                Method  = opts.Method,
-                Headers = opts.Headers,
-                Body    = opts.Body,
+                Url = opts.Url, Method = opts.Method,
+                Headers = opts.Headers, Body = opts.Body,
             })
         end)
-        if ok then return res end
-        return nil
+        return ok and res or nil
     end
 
 local function req(method, path, body)
     local opts = {
-        Url     = SUPABASE_URL .. path,
-        Method  = method,
+        Url    = SUPABASE_URL .. path,
+        Method = method,
         Headers = {
             ["Content-Type"]  = "application/json",
             ["apikey"]        = SUPABASE_KEY,
             ["Authorization"] = "Bearer " .. SUPABASE_KEY,
-            ["Prefer"]        = "return=minimal",
+            ["Prefer"]        = "return=representation",
         },
     }
-    if body then
-        opts.Body = HttpService:JSONEncode(body)
-    end
+    if body then opts.Body = HttpService:JSONEncode(body) end
     local ok, res = pcall(httpRequest, opts)
     if not ok or not res then return nil end
     if type(res) == "table" and res.Body and #res.Body > 0 then
@@ -71,7 +66,7 @@ local function getOrCreateChannel(name)
         return found[1].id
     end
     req("POST", "/rest/v1/channels", { name = name })
-    task.wait(0.3)
+    task.wait(0.4)
     local again = req("GET", "/rest/v1/channels?name=eq." .. name .. "&select=id")
     if type(again) == "table" and #again > 0 then
         channelCache[name] = again[1].id
@@ -93,34 +88,46 @@ end
 
 local function fetchNew(chId, chName)
     local path = "/rest/v1/messages?channel_id=eq." .. chId
-        .. "&select=player_name,player_id,content,created_at"
-        .. "&order=created_at.asc&limit=" .. MAX_MESSAGES
-    if lastMessageTime[chName] then
-        path = path .. "&created_at=gt." .. lastMessageTime[chName]
+        .. "&select=id,player_name,player_id,content,created_at"
+        .. "&order=id.asc&limit=50"
+
+    if lastMsgId[chName] then
+        path = path .. "&id=gt." .. lastMsgId[chName]
     end
+
     local msgs = req("GET", path)
     if type(msgs) ~= "table" or #msgs == 0 then return end
-    lastMessageTime[chName] = msgs[#msgs].created_at
+
+    lastMsgId[chName] = msgs[#msgs].id
+
     for _, msg in ipairs(msgs) do
-        if chName == currentChannel and appendMessage then
-            local ts    = (msg.created_at or ""):sub(12, 19)
+        if chName == currentCh and appendMsg then
+            local ts     = (msg.created_at or ""):sub(12, 19)
             local isSelf = tostring(msg.player_id) == tostring(localPlayer.UserId)
-            appendMessage(msg.player_name, msg.content, ts, isSelf)
+            appendMsg(msg.player_name, msg.content, ts, isSelf)
         end
     end
 end
 
 local function startPolling(chName)
     if pollConn then pollConn:Disconnect(); pollConn = nil end
-    currentChannel = chName
+    currentCh = chName
     local chId = getOrCreateChannel(chName)
     if not chId then
-        if appendSystem then appendSystem("ERR: channel '" .. chName .. "' not found") end
+        if appendSys then appendSys("ERR: channel '" .. chName .. "' not found") end
         return
     end
-    if not lastMessageTime[chName] then
-        lastMessageTime[chName] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+
+    if not lastMsgId[chName] then
+        local seed = req("GET", "/rest/v1/messages?channel_id=eq." .. chId
+            .. "&select=id&order=id.desc&limit=1")
+        if type(seed) == "table" and #seed > 0 then
+            lastMsgId[chName] = seed[1].id
+        else
+            lastMsgId[chName] = "00000000-0000-0000-0000-000000000000"
+        end
     end
+
     local elapsed = 0
     pollConn = RunService.Heartbeat:Connect(function(dt)
         elapsed = elapsed + dt
@@ -128,7 +135,8 @@ local function startPolling(chName)
         elapsed = 0
         task.spawn(fetchNew, chId, chName)
     end)
-    if appendSystem then appendSystem("Switched to #" .. chName) end
+
+    if appendSys then appendSys("Joined #" .. chName) end
 end
 
 local C = {
@@ -160,84 +168,66 @@ local function newFrame(parent, props)
     return f
 end
 
-local function newText(cls, parent, props)
+local function newInst(cls, parent, props)
     local t = Instance.new(cls)
-    t.BorderSizePixel = 0
-    t.BackgroundTransparency = 1
+    if t:IsA("GuiObject") then t.BorderSizePixel = 0 end
+    if t:IsA("TextLabel") or t:IsA("TextButton") or t:IsA("TextBox") then
+        t.BackgroundTransparency = 1
+    end
     for k, v in pairs(props or {}) do t[k] = v end
     t.Parent = parent
     return t
 end
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name          = "UniversalChat"
-screenGui.ResetOnSpawn  = false
+screenGui.Name           = "UniversalChat"
+screenGui.ResetOnSpawn   = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent        = localPlayer:WaitForChild("PlayerGui")
+screenGui.Parent         = localPlayer:WaitForChild("PlayerGui")
 
 local main = newFrame(screenGui, {
-    Size            = UDim2.new(0, W, 0, H),
-    Position        = UDim2.new(0.5, -W/2, 1, -H - 60),
+    Size             = UDim2.new(0, W, 0, H),
+    Position         = UDim2.new(0.5, -W/2, 1, -H - 60),
     BackgroundColor3 = C.BG,
 })
 corner(main, 10)
-do
-    local s = Instance.new("UIStroke")
-    s.Color = C.BORDER; s.Thickness = 1; s.Parent = main
-end
+do local s = Instance.new("UIStroke"); s.Color = C.BORDER; s.Thickness = 1; s.Parent = main end
 
 local header = newFrame(main, {
-    Size            = UDim2.new(1, 0, 0, 36),
-    BackgroundColor3 = C.HEADER,
-    ZIndex          = 3,
+    Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = C.HEADER, ZIndex = 3,
 })
 corner(header, 10)
 newFrame(header, {
-    Size            = UDim2.new(1, 0, 0, 10),
-    Position        = UDim2.new(0, 0, 1, -10),
-    BackgroundColor3 = C.HEADER,
-    ZIndex          = 3,
+    Size = UDim2.new(1, 0, 0, 10), Position = UDim2.new(0, 0, 1, -10),
+    BackgroundColor3 = C.HEADER, ZIndex = 3,
 })
 
 local function dot(x, col)
-    local d = newFrame(header, {
-        Size            = UDim2.new(0, 10, 0, 10),
-        Position        = UDim2.new(0, x, 0.5, -5),
-        BackgroundColor3 = col,
-        ZIndex          = 4,
-    })
-    corner(d, 5)
+    corner(newFrame(header, {
+        Size = UDim2.new(0, 10, 0, 10), Position = UDim2.new(0, x, 0.5, -5),
+        BackgroundColor3 = col, ZIndex = 4,
+    }), 5)
 end
 dot(12, Color3.fromRGB(255, 95, 87))
 dot(28, Color3.fromRGB(255, 189, 46))
 dot(44, Color3.fromRGB(40, 200, 64))
 
-local headerLbl = newText("TextLabel", header, {
-    Size             = UDim2.new(1, 0, 1, 0),
-    Text             = "â—ˆ  UNIVERSAL CHAT  Â·  #" .. DEFAULT_CHANNEL:upper(),
-    TextColor3       = C.ACCENT,
-    TextSize         = 12,
-    Font             = Enum.Font.GothamBold,
-    TextXAlignment   = Enum.TextXAlignment.Center,
-    ZIndex           = 4,
+local headerLbl = newInst("TextLabel", header, {
+    Size = UDim2.new(1, 0, 1, 0),
+    Text = "â—ˆ  UNIVERSAL CHAT  Â·  #" .. DEFAULT_CH:upper(),
+    TextColor3 = C.ACCENT, TextSize = 12, Font = Enum.Font.GothamBold,
+    TextXAlignment = Enum.TextXAlignment.Center, ZIndex = 4,
 })
 
-local minBtn = newText("TextButton", header, {
-    Size            = UDim2.new(0, 26, 0, 22),
-    Position        = UDim2.new(1, -30, 0.5, -11),
-    BackgroundColor3 = C.TBON,
-    BackgroundTransparency = 0,
-    Text            = "â€”",
-    TextColor3      = C.SUB,
-    TextSize        = 11,
-    Font            = Enum.Font.GothamBold,
-    ZIndex          = 5,
+local minBtn = newInst("TextButton", header, {
+    Size = UDim2.new(0, 26, 0, 22), Position = UDim2.new(1, -30, 0.5, -11),
+    BackgroundColor3 = C.TBON, BackgroundTransparency = 0,
+    Text = "â€”", TextColor3 = C.SUB, TextSize = 11, Font = Enum.Font.GothamBold, ZIndex = 5,
 })
 corner(minBtn, 4)
 
 local tabBar = newFrame(main, {
-    Size            = UDim2.new(1, 0, 0, 30),
-    Position        = UDim2.new(0, 0, 0, 36),
+    Size = UDim2.new(1, 0, 0, 30), Position = UDim2.new(0, 0, 0, 36),
     BackgroundColor3 = C.PANEL,
 })
 do
@@ -247,97 +237,71 @@ do
     l.Padding = UDim.new(0, 4)
     l.Parent = tabBar
     local p = Instance.new("UIPadding")
-    p.PaddingLeft = UDim.new(0, 6)
-    p.PaddingTop = UDim.new(0, 5)
-    p.PaddingBottom = UDim.new(0, 5)
+    p.PaddingLeft = UDim.new(0, 6); p.PaddingTop = UDim.new(0, 5); p.PaddingBottom = UDim.new(0, 5)
     p.Parent = tabBar
 end
 
 local chatArea = newFrame(main, {
-    Size             = UDim2.new(1, 0, 1, -112),
-    Position         = UDim2.new(0, 0, 0, 66),
-    BackgroundColor3  = C.BG,
-    ClipsDescendants = true,
+    Size = UDim2.new(1, 0, 1, -112), Position = UDim2.new(0, 0, 0, 66),
+    BackgroundColor3 = C.BG, ClipsDescendants = true,
 })
 
 local scroll = Instance.new("ScrollingFrame")
-scroll.Size                = UDim2.new(1, -6, 1, -6)
-scroll.Position            = UDim2.new(0, 3, 0, 3)
+scroll.Size = UDim2.new(1, -6, 1, -6)
+scroll.Position = UDim2.new(0, 3, 0, 3)
 scroll.BackgroundTransparency = 1
-scroll.ScrollBarThickness  = 3
+scroll.ScrollBarThickness = 3
 scroll.ScrollBarImageColor3 = C.ACCENT
-scroll.CanvasSize          = UDim2.new(0, 0, 0, 0)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-scroll.ScrollingDirection  = Enum.ScrollingDirection.Y
-scroll.Parent              = chatArea
+scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+scroll.Parent = chatArea
 do
-    local l = Instance.new("UIListLayout")
-    l.SortOrder = Enum.SortOrder.LayoutOrder
-    l.Padding = UDim.new(0, 1)
-    l.Parent = scroll
+    local l = Instance.new("UIListLayout"); l.SortOrder = Enum.SortOrder.LayoutOrder
+    l.Padding = UDim.new(0, 1); l.Parent = scroll
     local p = Instance.new("UIPadding")
     p.PaddingLeft = UDim.new(0, 8); p.PaddingRight = UDim.new(0, 8)
-    p.PaddingTop = UDim.new(0, 4);  p.PaddingBottom = UDim.new(0, 4)
-    p.Parent = scroll
+    p.PaddingTop = UDim.new(0, 4); p.PaddingBottom = UDim.new(0, 4); p.Parent = scroll
 end
 
 newFrame(main, {
-    Size            = UDim2.new(1, 0, 0, 1),
-    Position        = UDim2.new(0, 0, 1, -46),
+    Size = UDim2.new(1, 0, 0, 1), Position = UDim2.new(0, 0, 1, -46),
     BackgroundColor3 = C.BORDER,
 })
 
 local inputArea = newFrame(main, {
-    Size            = UDim2.new(1, 0, 0, 46),
-    Position        = UDim2.new(0, 0, 1, -46),
+    Size = UDim2.new(1, 0, 0, 46), Position = UDim2.new(0, 0, 1, -46),
     BackgroundColor3 = C.PANEL,
 })
 corner(inputArea, 10)
-newFrame(inputArea, {
-    Size            = UDim2.new(1, 0, 0, 10),
-    BackgroundColor3 = C.PANEL,
-})
+newFrame(inputArea, { Size = UDim2.new(1, 0, 0, 10), BackgroundColor3 = C.PANEL })
 
 local inputFrame = newFrame(inputArea, {
-    Size            = UDim2.new(1, -14, 0, 30),
-    Position        = UDim2.new(0, 7, 0, 8),
+    Size = UDim2.new(1, -14, 0, 30), Position = UDim2.new(0, 7, 0, 8),
     BackgroundColor3 = C.INBG,
 })
 corner(inputFrame, 5)
-do
-    local s = Instance.new("UIStroke")
-    s.Color = C.BORDER; s.Thickness = 1; s.Parent = inputFrame
-end
+do local s = Instance.new("UIStroke"); s.Color = C.BORDER; s.Thickness = 1; s.Parent = inputFrame end
 
-local inputBox = newText("TextBox", inputFrame, {
-    Size              = UDim2.new(1, -76, 1, 0),
-    Position          = UDim2.new(0, 10, 0, 0),
-    Text              = "",
-    PlaceholderText   = "Message #" .. DEFAULT_CHANNEL .. "...",
-    TextColor3        = C.TEXT,
-    PlaceholderColor3 = C.SUB,
-    TextSize          = 12,
-    Font              = Enum.Font.Gotham,
-    TextXAlignment    = Enum.TextXAlignment.Left,
-    ClearTextOnFocus  = false,
-    BackgroundTransparency = 0,
-    BackgroundColor3  = C.INBG,
+local inputBox = newInst("TextBox", inputFrame, {
+    Size = UDim2.new(1, -76, 1, 0), Position = UDim2.new(0, 10, 0, 0),
+    BackgroundColor3 = C.INBG, BackgroundTransparency = 0,
+    Text = "", PlaceholderText = "Message #" .. DEFAULT_CH .. "...",
+    TextColor3 = C.TEXT, PlaceholderColor3 = C.SUB,
+    TextSize = 12, Font = Enum.Font.Gotham,
+    TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false,
 })
 
-local sendBtn = newText("TextButton", inputFrame, {
-    Size            = UDim2.new(0, 58, 0, 22),
-    Position        = UDim2.new(1, -64, 0.5, -11),
-    BackgroundColor3 = C.ACCENT,
-    BackgroundTransparency = 0,
-    Text            = "SEND",
-    TextColor3      = Color3.fromRGB(8, 8, 18),
-    TextSize        = 11,
-    Font            = Enum.Font.GothamBold,
+local sendBtn = newInst("TextButton", inputFrame, {
+    Size = UDim2.new(0, 58, 0, 22), Position = UDim2.new(1, -64, 0.5, -11),
+    BackgroundColor3 = C.ACCENT, BackgroundTransparency = 0,
+    Text = "SEND", TextColor3 = Color3.fromRGB(8, 8, 18),
+    TextSize = 11, Font = Enum.Font.GothamBold,
 })
 corner(sendBtn, 4)
 
 local function setActiveTab(ch)
-    currentChannel = ch
+    currentCh = ch
     headerLbl.Text = "â—ˆ  UNIVERSAL CHAT  Â·  #" .. ch:upper()
     inputBox.PlaceholderText = "Message #" .. ch .. "..."
     for name, btn in pairs(tabButtons) do
@@ -348,15 +312,12 @@ local function setActiveTab(ch)
 end
 
 local function addTab(ch, order)
-    local btn = newText("TextButton", tabBar, {
-        Size            = UDim2.new(0, 72, 1, 0),
-        BackgroundColor3 = ch == DEFAULT_CHANNEL and C.TBON or C.TBOFF,
+    local btn = newInst("TextButton", tabBar, {
+        Size = UDim2.new(0, 72, 1, 0),
+        BackgroundColor3 = ch == DEFAULT_CH and C.TBON or C.TBOFF,
         BackgroundTransparency = 0,
-        Text            = "#" .. ch,
-        TextColor3      = ch == DEFAULT_CHANNEL and C.ACCENT or C.SUB,
-        TextSize        = 11,
-        Font            = Enum.Font.GothamBold,
-        LayoutOrder     = order,
+        Text = "#" .. ch, TextColor3 = ch == DEFAULT_CH and C.ACCENT or C.SUB,
+        TextSize = 11, Font = Enum.Font.GothamBold, LayoutOrder = order,
     })
     corner(btn, 4)
     tabButtons[ch] = btn
@@ -365,77 +326,50 @@ end
 
 for i, ch in ipairs(CHANNELS) do addTab(ch, i) end
 
-local addChBtn = newText("TextButton", tabBar, {
-    Size            = UDim2.new(0, 24, 1, 0),
-    BackgroundColor3 = C.TBOFF,
-    BackgroundTransparency = 0,
-    Text            = "+",
-    TextColor3      = C.SUB,
-    TextSize        = 15,
-    Font            = Enum.Font.GothamBold,
-    LayoutOrder     = 99,
+local addChBtn = newInst("TextButton", tabBar, {
+    Size = UDim2.new(0, 24, 1, 0), BackgroundColor3 = C.TBOFF, BackgroundTransparency = 0,
+    Text = "+", TextColor3 = C.SUB, TextSize = 15, Font = Enum.Font.GothamBold, LayoutOrder = 99,
 })
 corner(addChBtn, 4)
 
-appendMessage = function(name, content, ts, isSelf)
+appendMsg = function(name, content, ts, isSelf)
     local row = newFrame(scroll, {
-        Size            = UDim2.new(1, 0, 0, 0),
-        AutomaticSize   = Enum.AutomaticSize.Y,
-        BackgroundColor3 = C.BG,
-        BackgroundTransparency = 1,
-        LayoutOrder     = #msgElements + 1,
+        Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundTransparency = 1, LayoutOrder = #msgElements + 1,
     })
-    newText("TextLabel", row, {
-        Size           = UDim2.new(0, 42, 0, 16),
-        Position       = UDim2.new(0, 0, 0, 1),
-        Text           = ts,
-        TextColor3     = C.SUB,
-        TextSize       = 10,
-        Font           = Enum.Font.Gotham,
+    newInst("TextLabel", row, {
+        Size = UDim2.new(0, 42, 0, 16), Position = UDim2.new(0, 0, 0, 1),
+        Text = ts, TextColor3 = C.SUB, TextSize = 10, Font = Enum.Font.Gotham,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
-    newText("TextLabel", row, {
-        Size           = UDim2.new(0, 120, 0, 16),
-        Position       = UDim2.new(0, 46, 0, 1),
-        Text           = name,
-        TextColor3     = isSelf and C.ACCENT or C.ACCENT2,
-        TextSize       = 11,
-        Font           = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextTruncate   = Enum.TextTruncate.AtEnd,
+    newInst("TextLabel", row, {
+        Size = UDim2.new(0, 120, 0, 16), Position = UDim2.new(0, 46, 0, 1),
+        Text = name, TextColor3 = isSelf and C.ACCENT or C.ACCENT2,
+        TextSize = 11, Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd,
     })
-    newText("TextLabel", row, {
-        Size           = UDim2.new(1, -8, 0, 0),
-        Position       = UDim2.new(0, 4, 0, 17),
-        AutomaticSize  = Enum.AutomaticSize.Y,
-        Text           = content,
-        TextColor3     = isSelf and Color3.fromRGB(170, 210, 240) or C.TEXT,
-        TextSize       = 12,
-        Font           = Enum.Font.Gotham,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextWrapped    = true,
+    newInst("TextLabel", row, {
+        Size = UDim2.new(1, -8, 0, 0), Position = UDim2.new(0, 4, 0, 17),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        Text = content, TextColor3 = isSelf and Color3.fromRGB(170, 210, 240) or C.TEXT,
+        TextSize = 12, Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true,
     })
     table.insert(msgElements, row)
-    if #msgElements > MAX_MESSAGES then
-        table.remove(msgElements, 1):Destroy()
-    end
+    if #msgElements > MAX_MESSAGES then table.remove(msgElements, 1):Destroy() end
     task.defer(function()
         scroll.CanvasPosition = Vector2.new(0, scroll.AbsoluteCanvasSize.Y)
     end)
 end
 
-appendSystem = function(msg)
+appendSys = function(msg)
     local row = newFrame(scroll, {
-        Size          = UDim2.new(1, 0, 0, 18),
-        BackgroundTransparency = 1,
-        LayoutOrder   = #msgElements + 1,
+        Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1,
+        LayoutOrder = #msgElements + 1,
     })
-    newText("TextLabel", row, {
-        Size           = UDim2.new(1, 0, 1, 0),
-        Text           = "â—† " .. msg,
-        TextColor3     = C.SYS,
-        TextSize       = 10,
-        Font           = Enum.Font.GothamBold,
+    newInst("TextLabel", row, {
+        Size = UDim2.new(1, 0, 1, 0), Text = "â—† " .. msg,
+        TextColor3 = C.SYS, TextSize = 10, Font = Enum.Font.GothamBold,
         TextXAlignment = Enum.TextXAlignment.Left,
     })
     table.insert(msgElements, row)
@@ -452,7 +386,7 @@ local function doSend()
     if ch and body then
         task.spawn(sendMessage, ch:lower(), body)
     else
-        task.spawn(sendMessage, currentChannel, txt)
+        task.spawn(sendMessage, currentCh, txt)
     end
 end
 
@@ -467,7 +401,7 @@ addChBtn.MouseButton1Click:Connect(function()
         conn:Disconnect()
         local newCh = inputBox.Text:lower():gsub("%s+", "")
         inputBox.Text = ""
-        inputBox.PlaceholderText = "Message #" .. currentChannel .. "..."
+        inputBox.PlaceholderText = "Message #" .. currentCh .. "..."
         if enter and newCh ~= "" and not tabButtons[newCh] then
             table.insert(CHANNELS, newCh)
             addTab(newCh, #CHANNELS)
@@ -477,36 +411,32 @@ addChBtn.MouseButton1Click:Connect(function()
 end)
 
 minBtn.MouseButton1Click:Connect(function()
-    isMinimized = not isMinimized
-    chatArea.Visible  = not isMinimized
-    tabBar.Visible    = not isMinimized
-    inputArea.Visible = not isMinimized
+    isMin = not isMin
+    chatArea.Visible  = not isMin
+    tabBar.Visible    = not isMin
+    inputArea.Visible = not isMin
     TweenService:Create(main, TweenInfo.new(0.18), {
-        Size = isMinimized and UDim2.new(0, W, 0, 36) or UDim2.new(0, W, 0, H)
+        Size = isMin and UDim2.new(0, W, 0, 36) or UDim2.new(0, W, 0, H)
     }):Play()
-    minBtn.Text = isMinimized and "â–¡" or "â€”"
+    minBtn.Text = isMin and "â–¡" or "â€”"
 end)
 
 header.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = true
-        dragStart  = i.Position
-        startPos   = main.Position
+        isDrag = true; dragStart = i.Position; startPos = main.Position
     end
 end)
 header.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        isDragging = false
-    end
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then isDrag = false end
 end)
 UIS.InputChanged:Connect(function(i)
-    if isDragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+    if isDrag and i.UserInputType == Enum.UserInputType.MouseMovement then
         local d = i.Position - dragStart
         main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
     end
 end)
 
-appendSystem("Universal Chat loaded")
-appendSystem("SEND or Enter to chat  |  /channel msg for other channels")
+appendSys("Universal Chat loaded")
+appendSys("SEND or Enter  |  /channel msg for others")
 
-task.spawn(startPolling, DEFAULT_CHANNEL)
+task.spawn(startPolling, DEFAULT_CH)
